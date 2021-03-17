@@ -8,6 +8,7 @@ public class Palindrome {
         String s = scan.nextLine();
         System.out.println(isPalindrome(s));
     }
+    //Метод, где переворачиваем строку
     public static String reverseString(String s){
         String rev = "";
         for (int i = s.length() - 1; i >= 0; i--) {
@@ -15,6 +16,7 @@ public class Palindrome {
         }
         return rev;
     }
+    //Метод сравнения строк
     public static boolean isPalindrome(String s){
         return s.equals(reverseString(s));
     }

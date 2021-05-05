@@ -20,6 +20,11 @@ public class FractalExplorer {
     private FractalGenerator fractalGenerator; //Выбор фрактала для отрисовки
     private Rectangle2D.Double range; //Область отрисовки
     private JComboBox comboBox; //Lab5 Комбобокс
+    //Lab 6
+    private int rowsRemaining;
+    private JButton button; //Для метода enableGUI
+    private JButton buttonSave; //Для метода enableGUI
+
 
     //Конструктор
     public FractalExplorer (int displaySize){
@@ -32,8 +37,8 @@ public class FractalExplorer {
     //Настройки окна приложения
     public void createAndShowGUI(){
         JFrame frame = new JFrame("Fractal Generation");
-        JButton button = new JButton("Reset");
-        JButton buttonSave = new JButton("Save image");//Lab5
+        button = new JButton("Reset");
+        buttonSave = new JButton("Save image");//Lab5
         JPanel jPanel1 = new JPanel(); //Lab5
         JPanel jPanel2 = new JPanel(); // Lab5
         JLabel label = new JLabel("Fractal:");//Lab5
@@ -67,22 +72,15 @@ public class FractalExplorer {
         frame.setResizable(false);
     }
 
-    //Отрисовка фрактала
+    //Lab6 Отрисовка фрактала
     private void drawFractal(){
-        for (int x = 0; x < displaySize; x++){
-            for (int y = 0; y < displaySize; y++){
-                int counter = fractalGenerator.numIterations(FractalGenerator.getCoord(range.x, range.x + range.width, displaySize, x),
-                        fractalGenerator.getCoord(range.y, range.y + range.width, displaySize, y));
-                if (counter == -1)
-                    imageDisplay.drawPixel(x,y,0);
-                else {
-                    float hue = 0.7f + (float) counter / 200f;
-                    int rgbColor = Color.HSBtoRGB(hue, 1f, 1f);
-                    imageDisplay.drawPixel(x,y, rgbColor);
-                }
-            }
+        enableGUI(false);
+        rowsRemaining = displaySize;
+        for (int i = 0; i < displaySize; i++){
+            FractalWorker drawRow = new FractalWorker(i);
+            //Заруск задачи в фоновом режиме
+            drawRow.execute();
         }
-        imageDisplay.repaint();
     }
 
     public static void main(String[] args){
@@ -126,13 +124,58 @@ public class FractalExplorer {
     }
 
     //Меняем область отрисовки фрактала
-    public class MouseListener extends MouseAdapter{
+    public class MouseListener extends MouseAdapter {
         @Override
         public void mouseClicked(MouseEvent e) {
-            double x = FractalGenerator.getCoord(range.x, range.x + range.width, displaySize, e.getX());
-            double y = FractalGenerator.getCoord(range.y, range.y + range.width, displaySize, e.getY());
-            fractalGenerator.recenterAndZoomRange(range, x, y, 0.5);
-            drawFractal();
+            //Lab 6
+            if (rowsRemaining == 0) {
+                double x = FractalGenerator.getCoord(range.x, range.x + range.width, displaySize, e.getX());
+                double y = FractalGenerator.getCoord(range.y, range.y + range.width, displaySize, e.getY());
+                fractalGenerator.recenterAndZoomRange(range, x, y, 0.5);
+                drawFractal();
+            }
         }
+    }
+
+    //Lab 6
+    public class FractalWorker extends SwingWorker<Object,Object> {
+        private int y_coord;
+        private int[] rgb;
+        public FractalWorker (int y_coord){
+            this.y_coord = y_coord;
+        }
+        @Override
+        //Вычисление одной строки фрактала
+        protected Object doInBackground() throws Exception{
+            rgb = new int[displaySize];
+            for (int i = 0; i < displaySize; i++){
+                int count = fractalGenerator.numIterations(FractalGenerator.getCoord(range.x, range.x + range.width, displaySize, i),
+                        FractalGenerator.getCoord(range.y, range.y + range.width, displaySize, y_coord));
+                if (count == 1) rgb [i] = 0;
+                else {
+                    float hue = 0.7f + (float) count / 200f;
+                    int rgbColor = Color.HSBtoRGB(hue, 1f, 1f);
+                    rgb[i] = rgbColor;
+                }
+            }
+            return null;
+        }
+        //Перерисовка области
+        @Override
+        protected void done(){
+            for (int i = 0; i < displaySize; i++){
+                imageDisplay.drawPixel(i, y_coord, rgb[i]);
+            }
+            imageDisplay.repaint(0,0,y_coord,displaySize,1);
+            rowsRemaining--;
+            if (rowsRemaining == 0) enableGUI(true);
+        }
+    }
+
+    //Lab 6 ON.OFF GUI
+    public void enableGUI(boolean b){
+        button.setEnabled(b);
+        buttonSave.setEnabled(b);
+        comboBox.setEnabled(b);
     }
 }

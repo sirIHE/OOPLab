@@ -151,7 +151,7 @@ public class FractalExplorer {
             for (int i = 0; i < displaySize; i++){
                 int count = fractalGenerator.numIterations(FractalGenerator.getCoord(range.x, range.x + range.width, displaySize, i),
                         FractalGenerator.getCoord(range.y, range.y + range.width, displaySize, y_coord));
-                if (count == 1) rgb [i] = 0;
+                if (count == -1) rgb [i] = 0;
                 else {
                     float hue = 0.7f + (float) count / 200f;
                     int rgbColor = Color.HSBtoRGB(hue, 1f, 1f);

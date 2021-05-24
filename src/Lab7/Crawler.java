@@ -9,7 +9,7 @@ public class Crawler {
     private int maxDepth; //Макс глубина
     private LinkedList<URLDepthPair> toVisit; // Страницы для посещения
     private HashMap<String, URLDepthPair> visited; // Посещенные сайты
-    private static final String protocol = "http:"; //Протокол
+    private static final String protocol = "https:"; //Протокол
 
     public static void main(String args[])
     {

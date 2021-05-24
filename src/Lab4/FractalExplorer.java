@@ -77,8 +77,8 @@ public class FractalExplorer {
         enableGUI(false);
         rowsRemaining = displaySize;
         for (int i = 0; i < displaySize; i++){
+            //Заруск отрисовки
             FractalWorker drawRow = new FractalWorker(i);
-            //Заруск задачи в фоновом режиме
             drawRow.execute();
         }
     }
